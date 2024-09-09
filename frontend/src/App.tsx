@@ -35,6 +35,7 @@ const App: React.FC = () => {
     try {
       const result = await backend.checkIn();
       if ('ok' in result) {
+        setLeaderboard(result.ok);
         alert('Check-in successful!');
       } else {
         alert(`Check-in failed: ${result.err}`);
@@ -50,6 +51,7 @@ const App: React.FC = () => {
     try {
       const result = await backend.setUsername(username);
       if ('ok' in result) {
+        setLeaderboard(result.ok);
         alert('Username set successfully!');
       } else {
         alert(`Failed to set username: ${result.err}`);

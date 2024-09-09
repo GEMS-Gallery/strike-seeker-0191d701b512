@@ -1,17 +1,15 @@
 type Username = text;
 type Streak = nat;
-type Result_1 = 
- variant {
-   err: text;
-   ok: text;
- };
 type Result = 
  variant {
    err: text;
-   ok;
+   ok: vec record {
+             Username;
+             Streak;
+           };
  };
 service : {
-  checkIn: () -> (Result_1);
+  checkIn: () -> (Result);
   generateQRCode: () -> (text) query;
   getLeaderboard: () -> (vec record {
                                Username;

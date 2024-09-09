@@ -1,10 +1,12 @@
 export const idlFactory = ({ IDL }) => {
-  const Result_1 = IDL.Variant({ 'ok' : IDL.Text, 'err' : IDL.Text });
   const Username = IDL.Text;
   const Streak = IDL.Nat;
-  const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
+  const Result = IDL.Variant({
+    'ok' : IDL.Vec(IDL.Tuple(Username, Streak)),
+    'err' : IDL.Text,
+  });
   return IDL.Service({
-    'checkIn' : IDL.Func([], [Result_1], []),
+    'checkIn' : IDL.Func([], [Result], []),
     'generateQRCode' : IDL.Func([], [IDL.Text], ['query']),
     'getLeaderboard' : IDL.Func(
         [],

@@ -33,7 +33,7 @@ actor {
   var currentQRCode : Text = "";
   var lastQRCodeUpdate : Time.Time = 0;
 
-  public shared(msg) func checkIn() : async Result.Result<Text, Text> {
+  public shared(msg) func checkIn() : async Result.Result<[(Username, Streak)], Text> {
     let caller = msg.caller;
     let now = Time.now();
 
@@ -53,7 +53,7 @@ actor {
     };
 
     checkInsMap.put(caller, now);
-    #ok("Check-in successful")
+    #ok(await getLeaderboard())
   };
 
   func updateStreak(profile: UserProfile, now: Time.Time) : UserProfile {
@@ -84,21 +84,28 @@ actor {
       else if (a.streak < b.streak) { #greater }
       else { #equal }
     });
-    Array.map<UserProfile, (Username, Streak)>(Array.take(sortedLeaderboard, 20), func (profile: UserProfile) : (Username, Streak) {
+    Array.map<UserProfile, (Username, Streak)>(sortedLeaderboard, func (profile: UserProfile) : (Username, Streak) {
       (Option.get(profile.username, "Anonymous"), profile.streak)
     })
   };
 
-  public shared(msg) func setUsername(username: Text) : async Result.Result<(), Text> {
+  public shared(msg) func setUsername(username: Text) : async Result.Result<[(Username, Streak)], Text> {
     let caller = msg.caller;
     switch (userProfilesMap.get(caller)) {
-      case (null) { #err("User not found") };
+      case (null) {
+        let newProfile : UserProfile = {
+          username = ?username;
+          streak = 0;
+          lastCheckIn = null;
+        };
+        userProfilesMap.put(caller, newProfile);
+      };
       case (?profile) {
         let updatedProfile = { profile with username = ?username };
         userProfilesMap.put(caller, updatedProfile);
-        #ok()
       };
-    }
+    };
+    #ok(await getLeaderboard())
   };
 
   public query func generateQRCode() : async Text {
